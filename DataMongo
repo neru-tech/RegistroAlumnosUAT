@@ -1,0 +1,86 @@
+package datamongo;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
+
+public class DataMongo {
+
+
+    public static void main(String[] args) {
+       
+       MongoClient mongo = crearConexion();
+        
+       if(mongo !=null){
+           //Crear la coleccion
+           DB db = mongo.getDB("Alumnos");
+           
+           
+       }
+        
+       
+    }
+    public static MongoClient crearConexion(){
+        System.out.println("Prueba");
+        MongoClient mongo = null;
+        mongo = new MongoClient("localhost", 27017);
+        return mongo;
+    }
+    public static void insertarAlumno(DB db,String coleccion, String nombre, String edad, String carrera){
+        DBCollection colec = db.getCollection(coleccion);
+        
+        BasicDBObject documento = new BasicDBObject();
+        documento.put("Nombre", nombre);
+        documento.put("Edad", edad);
+        documento.put("Carrera", carrera);
+        
+        colec.insert(documento);
+        
+    }
+    public static void mostrarColeccion(DB db, String coleccion){
+        //Muestra los datos en la coleccion
+        DBCollection colec = db.getCollection(coleccion);
+        
+        DBCursor cursor = colec.find();
+        
+        while(cursor.hasNext()){
+            System.out.println("* "+ cursor.next().get("Nombre") + " - " + cursor.curr().get("Edad") + " - " + cursor.curr().get("Carrera") );
+        }
+    }
+    public static void buscarPorNombre(DB db, String coleccion, String Nombre){
+        DBCollection colect = db.getCollection(coleccion);
+        
+        BasicDBObject consulta = new BasicDBObject();
+        consulta.put("Nombre", Nombre);
+        
+        DBCursor cursor = colect.find(consulta);
+        while (cursor.hasNext()){
+            System.out.println("-- " + cursor.next().get("Nombre") + " - " + cursor.curr().get("Edad") + " - " + cursor.curr().get("Carrera"));
+        }
+        
+    }
+    public static void actualizarDocumento(DB db, String coleccion, String Nombre, String Carrera, String Edad){
+        DBCollection colec = db.getCollection(coleccion);
+        
+        BasicDBObject actualizarCarrera = new BasicDBObject();
+            actualizarCarrera.append("$set", new BasicDBObject().append("Carrera",Carrera ));
+        
+         BasicDBObject actualizarEdad = new BasicDBObject();
+            actualizarEdad.append("$set", new BasicDBObject().append("Edad",Edad ));
+        
+        BasicDBObject buscarPorNombre = new BasicDBObject();
+        buscarPorNombre.append("Nombre", Nombre);
+        
+        colec.update(buscarPorNombre, actualizarCarrera);
+    }
+    public static void borrarDocumento(DB db, String coleccion, String Nombre){
+        DBCollection colec = db.getCollection(coleccion);
+        
+        colec.remove(new BasicDBObject().append("Nombre", Nombre));
+        
+    }
+
+  
+}
